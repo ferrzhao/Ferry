@@ -7,6 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * JedisPool 管理类
+ * @author ferry
+ *
+ */
 public class JedisPoolManager {
 	
 	private static Map<String, JedisPool> jedisPoolMap = new ConcurrentHashMap<String, JedisPool>();
@@ -40,6 +45,7 @@ public class JedisPoolManager {
 			jpc.setMinIdle(conf.getMinIdel());
 			jpc.setMaxWaitMillis(conf.getTimeout());
 			jpc.setTestWhileIdle(true);
+			System.out.println(conf.toString());
 			
 			JedisPool pool = new JedisPool(jpc, conf.getIp(), conf.getPort());
 			pool.returnResource(pool.getResource());
@@ -61,11 +67,16 @@ public class JedisPoolManager {
 	 * 根据ip与端口号获取对应redis的连接池
 	 * @param ip
 	 * @param port
-	 * @return
+	 * @return 
 	 */
 	public JedisPool getJedisPool(String ip, int port){
 		
-		return jedisPoolMap.get(ip + port);
+		String key = ip + port;
+		if(jedisPoolMap.containsKey(key)){
+			return jedisPoolMap.get(key);
+		} else{
+			throw new NullPointerException("jedis server not exist , ip " + port + ", port "+ ip);
+		}
 	}
 	
 	/**
